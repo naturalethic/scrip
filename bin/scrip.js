@@ -22,8 +22,15 @@ if (!lifecycle) {
   argv = minimist(process.argv.slice(2))
 }
 
+function usage () {
+  console.log(`Usage: ${bin} <script>`)
+  console.log('  create')
+  console.log('  sync')
+  console.log('  ' + Object.keys(pkg.scripts || {}).join('  \n'))
+}
+
 if (!script) {
-  console.log('No script specified')
+  usage()
   process.exit(1)
 }
 
@@ -56,7 +63,7 @@ if (!lifecycle) {
   }
 
   if (script === 'sync' || script === 'create') {
-    const scripts = {}
+    const scripts = pkg.scripts || {}
     const files = glob.sync('scripts/**/*.js')
     for (const file of files) {
       if (/^scripts\/lib/.test(file)) continue

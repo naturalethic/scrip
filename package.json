@@ -1,18 +1,12 @@
 {
   "name": "scrip",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "bin": {
     "scrip": "./bin/scrip.js"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/naturalethic/scrip"
-  },
-  "scripts": {
-    "foo:bar": "scrip",
-    "foo:bar:bam": "scrip",
-    "foo:bar:baz": "scrip",
-    "foo:bar:boo": "scrip"
   },
   "dependencies": {
     "glob": "^7.1.2",
