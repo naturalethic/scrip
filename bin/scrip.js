@@ -9,7 +9,7 @@ const camelcase = require('lodash.camelcase')
 
 const pkg = JSON.parse(fs.readFileSync('package.json'))
 
-const bin = pkg.name === 'scrip' ? 'bin/script.js' : 'scrip'
+const bin = pkg.name === 'scrip' ? 'bin/scrip.js' : 'scrip'
 
 let script = process.env.npm_lifecycle_event
 const lifecycle = !!script
@@ -24,7 +24,7 @@ if (!lifecycle) {
 
 function usage () {
   console.log(`Usage: ${bin} <script>`)
-  console.log('  create')
+  console.log('  create | add')
   console.log('  sync')
   console.log('  ' + Object.keys(pkg.scripts || {}).join('  \n'))
 }
@@ -47,7 +47,7 @@ for (const key of Object.keys(argv)) {
 }
 
 if (!lifecycle) {
-  if (script === 'create') {
+  if (script === 'create' || script === 'add') {
     if (!options[0]) {
       console.log('Usage: scrip create <name>')
       process.exit(1)
@@ -82,7 +82,8 @@ let fn
 try {
   fn = require(modPath)
 } catch (e) {
-  console.log(`'${modPath}' does not exist`)
+  console.log(`Error importing '${modPath}'`)
+  console.log(e)
   process.exit(1)
 }
 
