@@ -66,7 +66,7 @@ if (!lifecycle) {
     const scripts = pkg.scripts || {}
     const files = glob.sync('scripts/**/*.js')
     for (const file of files) {
-      if (/^scripts\/lib/.test(file)) continue
+      if (/^scripts\/(preamble.js|lib)/.test(file)) continue
       const scriptPath = (/^scripts\/(.*)\/index.js$/.exec(file) || /^scripts\/(.*).js$/.exec(file))[1]
       if (scriptPath === 'index') continue
       scripts[scriptPath.replace(/\//g, ':')] = bin
