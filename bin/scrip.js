@@ -77,9 +77,14 @@ if (!lifecycle) {
   process.exit(0)
 }
 
+const preamblePath = `${process.cwd()}/scripts/preamble.js`
 const modPath = `${process.cwd()}/scripts/${script.split(':').join('/')}`
+let pfn
 let fn
 try {
+  if (fs.existsSync(preamblePath)) {
+    pfn = require(preamblePath)
+  }
   fn = require(modPath)
 } catch (e) {
   console.log(`Error importing '${modPath}'`)
@@ -87,9 +92,21 @@ try {
   process.exit(1)
 }
 
-if (typeof fn !== 'function') {
-  console.log(`'${modPath}' must set module.exports to a function`)
-  process.exit(1)
+async function run () {
+  if (fs.existsSync(preamblePath)) {
+    if (typeof pfn !== 'function') {
+      console.log(`'${preamblePath}' must set module.exports to a function`)
+      process.exit(1)
+    }
+    await pfn(options)
+  }
+
+  if (typeof fn !== 'function') {
+    console.log(`'${modPath}' must set module.exports to a function`)
+    process.exit(1)
+  }
+
+  fn(options)
 }
 
-fn(options)
+run()
