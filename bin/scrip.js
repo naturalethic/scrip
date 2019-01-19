@@ -3,7 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const mkdirp = require('mkdirp')
-const glob = require('glob')
+const glob = require('glob').sync
 const minimist = require('minimist')
 const camelcase = require('lodash.camelcase')
 
@@ -64,12 +64,19 @@ if (!lifecycle) {
 
   if (script === 'sync' || script === 'create') {
     const scripts = pkg.scripts || {}
-    const files = glob.sync('scripts/**/*.js')
+    let files = glob('scripts/**/*.js')
     for (const file of files) {
       if (/^scripts\/(preamble.js|lib)/.test(file)) continue
       const scriptPath = (/^scripts\/(.*)\/index.js$/.exec(file) || /^scripts\/(.*).js$/.exec(file))[1]
       if (scriptPath === 'index') continue
       scripts[scriptPath.replace(/\//g, ':')] = bin
+    }
+    if (fs.existsSync('packages')) {
+      files = glob('packages/*/scripts/**/*.js')
+      for (const file of files) {
+        const m = (/^packages\/([^/]+)\/scripts\/(.*)\/index.js$/.exec(file) || /^packages\/([^/]+)\/scripts\/(.*).js$/.exec(file))
+        scripts[`${m[1]}:${m[2].replace(/\//g, ':')}`] = bin
+      }
     }
     pkg.scripts = scripts
     fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
@@ -78,7 +85,16 @@ if (!lifecycle) {
 }
 
 const preamblePath = `${process.cwd()}/scripts/preamble.js`
-const modPath = `${process.cwd()}/scripts/${script.split(':').join('/')}`
+const modPaths = [
+  `${process.cwd()}/scripts/${script.split(':').join('/')}`,
+  `${process.cwd()}/packages/${script.split(':')[0]}/scripts/${script.split(':').slice(1).join('/')}`
+]
+const modPath = modPaths.filter(s => fs.existsSync(s) || fs.existsSync(`${s}.js`))[0]
+if (!modPath) {
+  console.log(`No module found for script '${script}' in: \n  ${modPaths[0]}\n  ${modPaths[1]}`)
+  process.exit(1)
+}
+
 let pfn
 let fn
 try {
